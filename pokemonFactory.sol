@@ -7,8 +7,13 @@ contract PokemonFactory {
   struct Pokemon {
     uint id;
     string name;
+    Ability[] abilities;
   }
 
+  struct Ability{
+    string name;
+    string description;
+  }
     Pokemon[] private pokemons;
 
     mapping (uint => address) public pokemonToOwner;
@@ -19,17 +24,23 @@ contract PokemonFactory {
       string newPokemonName
   );
 
+    modifier validateData(uint _id, string memory _name){
+    require(
+      _id > 0, "ID debe ser diferente a 0"
+    );
+    require(
+      bytes(_name).length != 0, "Seleccionar nombre"
+    );
+    _;
+  }
      
-      function createPokemon (string memory _name, uint _id) public {
-        require(_id > 0, "El ID debe ser mayor a 0");
-        require(bytes(_name).length != 0,"Debe seleccionar un nombre");
-        require(bytes(_name).length > 2, "El nombre debe contener maás de 2 caracteres");
-
-        pokemons.push(Pokemon(_id, _name));
-          _pokemon.id = _id;
-          _pokemon.name = _name;
+      function createPokemon (string memory _name, uint _id,  string memory _abilityName, string memory _abilityDescription) public validateData(_id, _name) {
+        pokemons.push(Pokemon(_id, _name, _abilityName));
+        pokemons.id = _id;
+        pokemons.name = _name;
         pokemonToOwner[_id] = msg.sender;
         ownerPokemonCount[msg.sender]++;
+        addAbility(_abilityName, _abilityDescription);
 
         emit eventNewPokemon(_id, _name);
     }
@@ -44,6 +55,10 @@ contract PokemonFactory {
       uint b = 2;
       product = a * b;
       sum = a + b; 
+   }
+
+   function addAbility(uint _id, string memory _abilityName, string memory _abilityDescription) public {
+     pokemons[_id].abilities.push(Ability(_abilityName, _abilityDescription));
    }
 
 }
